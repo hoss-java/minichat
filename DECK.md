@@ -406,8 +406,8 @@ gantt
 > </details>
 
 ## 001-0003
-> **Create a pre- high-level architecture plan.** ![status](https://img.shields.io/badge/status-ONGOING-yellow)
-> <details open>
+> **Create a pre- high-level architecture plan.** ![status](https://img.shields.io/badge/status-DONE-brightgreen)
+> <details >
 >     <summary>Details</summary>
 > 
 > # DOD (definition of done):
