@@ -230,6 +230,213 @@ graph TB
     style ClientStorage fill:#16a085,stroke:#0e6251,color:#fff
 ```
 
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          P2P CHAT SYSTEM ARCHITECTURE                           │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+                              PHASE 7-8: COMPLETE SYSTEM
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                                 INTERNET                                         │
+└──────────────────────────────────────────────────────────────────────────────────┘
+                    │                              │                    │
+                    ▼                              ▼                    ▼
+        ┌─────────────────────┐      ┌──────────────────────┐  ┌────────────────┐
+        │   Browser Client    │      │   Desktop App        │  │  Mobile App    │
+        │   (React Web)       │      │   (Electron)         │  │  (React Native)│
+        └─────────────────────┘      └──────────────────────┘  └────────────────┘
+                    │                              │                    │
+                    │         All clients use      │                    │
+                    │         same React code      │                    │
+                    └──────────────┬───────────────┴────────────────────┘
+                                   │
+                    ┌──────────────▼──────────────┐
+                    │   HTTPS + WebSocket        │
+                    │   (Encrypted Transport)    │
+                    └──────────────┬──────────────┘
+                                   │
+        ┌──────────────────────────┴──────────────────────────┐
+        │                                                      │
+        ▼                                                      ▼
+┌─────────────────────────────────────┐    ┌────────────────────────────────┐
+│      SPRING BOOT SIGNALING SERVER   │    │   DATABASE (MySQL/PostgreSQL)  │
+│                                     │    │                                │
+│  ┌─────────────────────────────────┐    │  ┌──────────────────────────┐  │
+│  │ Authentication Module           │    │  │ User Records             │  │
+│  │ ├─ JWT Login/Register           │    │  │ ├─ id, email, password   │  │
+│  │ ├─ Token validation/refresh     │    │  │ ├─ public_key, fingerprint
+│  │ ├─ User profile mgmt            │    │  │ ├─ created_at            │  │
+│  │ └─ Session tracking             │    │  │ └─ metadata              │  │
+│  └─────────────────────────────────┘    │  │                          │  │
+│                                     │    │  │ ┌──────────────────────────┐ │
+│  ┌─────────────────────────────────┐    │  │ Message Records          │ │
+│  │ WebSocket Signaling Module      │    │  │ ├─ id, room_id           │ │
+│  │ ├─ User online/offline tracking │    │  │ ├─ sender_id, receiver_id│ │
+│  │ ├─ Room management              │    │  │ ├─ encrypted_content     │ │
+│  │ ├─ Peer discovery               │    │  │ ├─ is_encrypted (bool)   │ │
+│  │ ├─ SDP offer/answer relay       │    │  │ ├─ created_at, is_read   │ │
+│  │ ├─ ICE candidate forwarding     │    │  │ └─ storage_type (local/  │ │
+│  │ └─ Connection status broadcast  │    │  │    server)               │ │
+│  └─────────────────────────────────┘    │  │                          │  │
+│                                     │    │  │ ┌──────────────────────────┐ │
+│  ┌─────────────────────────────────┐    │  │ Room Records             │ │
+│  │ Encryption Module               │    │  │ ├─ id, name, created_by   │ │
+│  │ ├─ Key exchange endpoints       │    │  │ └─ created_at            │ │
+│  │ ├─ Key storage (encrypted)      │    │  │                          │  │
+│  │ ├─ Key rotation/revocation      │    │  │ ┌──────────────────────────┐ │
+│  │ └─ Trust-on-first-use logic     │    │  │ Cryptographic Keys       │ │
+│  └─────────────────────────────────┘    │  │ ├─ id, user_id           │ │
+│                                     │    │  │ ├─ public_key, fingerprint
+│  ┌─────────────────────────────────┐    │  │ ├─ key_type (auto/manual)│ │
+│  │ Message Persistence Module      │    │  │ └─ created_at            │ │
+│  │ ├─ Save encrypted messages      │    │  └──────────────────────────┘  │
+│  │ ├─ Retrieve message history     │    └────────────────────────────────┘
+│  │ ├─ Message retention policies   │
+│  │ ├─ Read receipts                │
+│  │ └─ Pagination                   │
+│  └─────────────────────────────────┘    ┌────────────────────────────────┐
+│                                     │    │   STUN/TURN Servers            │
+│  ┌─────────────────────────────────┐    │                                │
+│  │ Monitoring & Logging Module     │    │  ├─ Google STUN (free)        │
+│  │ ├─ Connection quality metrics   │    │  │  (stun.l.google.com:19302)  │
+│  │ ├─ Error tracking               │    │  │                            │
+│  │ ├─ Message throughput stats     │    │  └─ Coturn (self-hosted)      │
+│  │ └─ Security audit logs          │    │     (for relay fallback)      │
+│  └─────────────────────────────────┘    └────────────────────────────────┘
+│                                     │
+└─────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                        CLIENT-SIDE ARCHITECTURE (React)                          │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         REACT COMPONENT HIERARCHY                               │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │ Root Component                                                          │  │
+│  │                                                                         │  │
+│  │  ├─ Auth Context (JWT, User state, Login/Logout)                      │  │
+│  │  ├─ Signaling Context (WebSocket, Room state, Peers)                  │  │
+│  │  ├─ Crypto Context (Public key, Private key, Encrypt/Decrypt)         │  │
+│  │  └─ Storage Context (Local vs Server storage preference)              │  │
+│  │                                                                         │  │
+│  │  ├─ Protected Route                                                   │  │
+│  │  │  └─ Dashboard                                                      │  │
+│  │  │     ├─ Room List (display available rooms, online peer count)      │  │
+│  │  │     ├─ Create Room Form (create new room)                          │  │
+│  │  │     ├─ Join Room Form (join existing room)                         │  │
+│  │  │     └─ Room Panel                                                  │  │
+│  │  │        ├─ Peer List (show online peers, key fingerprints)          │  │
+│  │  │        ├─ Connection Status (connecting/connected/error)           │  │
+│  │  │        ├─ Chat Window                                              │  │
+│  │  │        │  ├─ Message List (render messages, show encryption status)│  │
+│  │  │        │  └─ Message Input (send message, show encryption indicator)
+│  │  │        ├─ Storage Toggle (local vs server)                         │  │
+│  │  │        ├─ Key Display (show your public key & fingerprint)         │  │
+│  │  │        ├─ Key Import (paste peer's key or import manually)         │  │
+│  │  │        └─ Media Controls (audio/video buttons - Phase 7)           │  │
+│  │  │                                                                     │  │
+│  │  └─ Login Page                                                        │  │
+│  │     ├─ Login Form                                                     │  │
+│  │     ├─ Register Form                                                  │  │
+│  │     └─ Key Generation Prompt (on first login)                         │  │
+│  │                                                                         │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │ SERVICES LAYER                                                          │  │
+│  │                                                                         │  │
+│  │  ├─ Authentication Service                                             │  │
+│  │  │  ├─ register(email, password)                                       │  │
+│  │  │  ├─ login(email, password)                                          │  │
+│  │  │  └─ logout()                                                        │  │
+│  │  │                                                                     │  │
+│  │  ├─ Signaling Service                                                  │  │
+│  │  │  ├─ connect() [WebSocket]                                           │  │
+│  │  │  ├─ createRoom(name)                                                │  │
+│  │  │  ├─ joinRoom(roomId)                                                │  │
+│  │  │  ├─ leaveRoom()                                                     │  │
+│  │  │  ├─ getPeerList()                                                   │  │
+│  │  │  ├─ onSdpOffer(callback) [listen for peer's offer]                 │  │
+│  │  │  ├─ sendSdpOffer(peerId, offer)                                     │  │
+│  │  │  ├─ onIceCandidate(callback) [listen for ICE]                       │  │
+│  │  │  └─ sendIceCandidate(peerId, candidate)                             │  │
+│  │  │                                                                     │  │
+│  │  ├─ WebRTC Service                                                     │  │
+│  │  │  ├─ createPeerConnection(peerId)                                    │  │
+│  │  │  ├─ createOffer(peerId)                                             │  │
+│  │  │  ├─ handleAnswer(peerId, answer)                                    │  │
+│  │  │  ├─ addIceCandidate(peerId, candidate)                              │  │
+│  │  │  ├─ createDataChannel() [for messaging]                             │  │
+│  │  │  ├─ onDataChannelReceived(callback)                                 │  │
+│  │  │  ├─ sendMessage(peerId, message)                                    │  │
+│  │  │  ├─ getMediaStream(audio, video) [Phase 7]                          │  │
+│  │  │  └─ addMediaTracks(peerId, stream) [Phase 7]                        │  │
+│  │  │                                                                     │  │
+│  │  ├─ Cryptography Service                                               │  │
+│  │  │  ├─ generateKeyPair()                                               │  │
+│  │  │  ├─ getPublicKey()                                                  │  │
+│  │  │  ├─ importPublicKey(publicKeyPem)                                   │  │
+│  │  │  ├─ encryptMessage(plaintext, recipientPublicKey)                   │  │
+│  │  │  ├─ decryptMessage(ciphertext, recipientPublicKey)                  │  │
+│  │  │  ├─ getFingerprint(publicKey)                                       │  │
+│  │  │  └─ verifySignature(message, signature, publicKey)                  │  │
+│  │  │                                                                     │  │
+│  │  ├─ Storage Service                                                    │  │
+│  │  │  ├─ saveMessageLocal(peerId, roomId, message)                       │  │
+│  │  │  ├─ getMessagesLocal(peerId, roomId, limit)                         │  │
+│  │  │  ├─ saveMessageServer(roomId, message)                              │  │
+│  │  │  ├─ getMessagesServer(roomId, limit)                                │  │
+│  │  │  ├─ syncMessages(peerId, roomId)                                    │  │
+│  │  │  ├─ setStorageMode(mode: 'local' | 'server' | 'hybrid')             │  │
+│  │  │  └─ clearLocalMessages()                                            │  │
+│  │  │                                                                     │  │
+│  │  ├─ API Client Service                                                 │  │
+│  │  │  ├─ GET /auth/me                                                    │  │
+│  │  │  ├─ POST /auth/login                                                │  │
+│  │  │  ├─ POST /auth/register                                             │  │
+│  │  │  ├─ GET /rooms                                                      │  │
+│  │  │  ├─ POST /rooms (create)                                            │  │
+│  │  │  ├─ POST /keys/generate                                             │  │
+│  │  │  ├─ GET /keys/{userId}                                              │  │
+│  │  │  ├─ POST /messages (save encrypted)                                 │  │
+│  │  │  └─ GET /messages?roomId=X&limit=50                                 │  │
+│  │  │                                                                     │  │
+│  │  └─ Local Storage Service                                              │  │
+│  │     ├─ setItem(key, value)                                             │  │
+│  │     ├─ getItem(key)                                                    │  │
+│  │     ├─ removeItem(key)                                                 │  │
+│  │     └─ clear()                                                         │  │
+│  │                                                                         │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │ STORAGE LAYER                                                           │  │
+│  │                                                                         │  │
+│  │  ├─ Browser Local Storage                                              │  │
+│  │  │  ├─ jwt_token                                                       │  │
+│  │  │  ├─ user_id                                                         │  │
+│  │  │  ├─ private_key (encrypted)                                         │  │
+│  │  │  ├─ public_key                                                      │  │
+│  │  │  ├─ chat_{peerId}_{roomId} (JSON array of messages)                │  │
+│  │  │  └─ storage_mode (local | server | hybrid)                          │  │
+│  │  │                                                                     │  │
+│  │  └─ Browser Indexed Database (for large message history)               │  │
+│  │     └─ messages (objectStore with index on roomId)                     │  │
+│  │                                                                         │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                          MESSAGE FLOW: USER SENDS A MESSAGE
+
+```
+
 ## Plan and Time Estimation for P2P Chat System
 
 Time Estimation is based on  **Subscription-Platform** performance, 
