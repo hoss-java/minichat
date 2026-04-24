@@ -27,11 +27,18 @@ The goal of this card is to initialize the Spring Boot project with all necessar
 - Database connection configured (MySQL)
 
 # TODO:
-- [] 1. Create Spring Boot Maven project
-- [] 2. Add Spring Web, Security, JPA, WebSocket dependencies
-- [] 3. Configure application.properties for database
-- [] 4. Create base folder structure
-- [] 5. Test project startup
+- [x] 1. Create Spring Boot Maven project
+- [ ] 2. Add Spring Web, Security, JPA, WebSocket dependencies
+- [ ] 3. Configure application.properties for database
+- [ ] 4. Create base folder structure
+- [ ] 5. Test project startup
 
 # Reports:
-*
+* To run/test server
+>```
+>mvn spring-boot:run -Dspring-boot.run.arguments="--spring>.profiles.active=dev"
+>
+>mvn test -Dspring.profiles.active=test
+>mvn test -Dspring.profiles.active=test >-Dtest=MiniChatAppTest
+>```
+
