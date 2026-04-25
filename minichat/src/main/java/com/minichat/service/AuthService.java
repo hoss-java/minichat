@@ -45,8 +45,8 @@ public class AuthService {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setActive(true);
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setIsActive(true);
         
         Role userRole = new Role();
         userRole.setId(2L);
@@ -73,11 +73,11 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new UnauthorizedException("Invalid email or password");
         }
 
-        if (!user.getActive()) {
+        if (!user.getIsActive()) {
             throw new UnauthorizedException("User account is inactive");
         }
 

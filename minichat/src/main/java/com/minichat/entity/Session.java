@@ -10,7 +10,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sessions")
+@Table(name = "sessions", indexes = {
+    @Index(name = "idx_user_id", columnList = "user_id"),
+    @Index(name = "idx_access_token", columnList = "accessToken"),
+    @Index(name = "idx_refresh_token", columnList = "refreshToken"),
+    @Index(name = "idx_expires_at", columnList = "expiresAt")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,10 +31,16 @@ public class Session {
     private User user;
 
     @Column(nullable = false, unique = true, columnDefinition = "TEXT")
+    private String accessToken;
+
+    @Column(nullable = false, unique = true, columnDefinition = "TEXT")
     private String refreshToken;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;
+
+    @Column
+    private LocalDateTime refreshTokenExpiresAt;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -47,3 +58,4 @@ public class Session {
     @Column
     private String userAgent;
 }
+

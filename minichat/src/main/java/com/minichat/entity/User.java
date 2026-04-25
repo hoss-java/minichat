@@ -1,22 +1,29 @@
 package com.minichat.entity;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_username", columnList = "username"),
+    @Index(name = "idx_email", columnList = "email"),
+    @Index(name = "idx_is_active", columnList = "is_active")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class User {
 
@@ -25,13 +32,13 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
-    private String username;
+    private String passwordHash;
 
     @Column(columnDefinition = "TEXT")
     private String publicKey;
@@ -45,6 +52,7 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @Builder.Default
     private Set<Role> roles = new HashSet<>();
 
     @CreatedDate
@@ -55,9 +63,10 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column
+    @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
-    @Column(nullable = false)
-    private Boolean active = true;
+    @Builder.Default
+    @Column(nullable = false, name = "is_active")
+    private Boolean isActive = true;
 }
