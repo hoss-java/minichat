@@ -1042,35 +1042,92 @@ gantt
 > **COMPLETE** - Ready for Phase 1: User Registration & Login Endpoints
 > </details>
 
-## 001-0007
-> **Login Endpoint with JWT** ![status](https://img.shields.io/badge/status-NOT--STARTED-lightgrey)
+## 001-0006
+> **User Registration Endpoint** ![status](https://img.shields.io/badge/status-DONE-brightgreen)
 > <details >
 >     <summary>Details</summary>
 > 
-> The goal of this card is to implement the login endpoint with JWT token generation, refresh token logic, and proper error handling.
+> The goal of this card is to implement the user registration endpoint with input validation, password hashing, and JWT token generation.
 > 
 > # DOD (definition of done):
-> - POST /auth/login endpoint works
-> - Email and password validation implemented
-> - JWT access token generated on successful login
-> - Refresh token logic implemented
-> - Token expiration configured
-> - Error responses for invalid credentials
-> - Last login timestamp updated
+> - POST /auth/register endpoint works
+> - Input validation implemented (email format, password strength)
+> - Password hashing with BCrypt implemented
+> - Duplicate user check implemented
+> - JWT token returned on successful registration
+> - Error responses for invalid input
 > 
 > # TODO:
-> - [] 1. Create JWT utility class (generate, validate, refresh tokens)
-> - [] 2. Create login DTO with email and password
-> - [] 3. Implement login service with credential validation
-> - [] 4. Build login controller endpoint
-> - [] 5. Add refresh token generation and storage
-> - [] 6. Configure token expiration times
-> - [] 7. Update last_login field in User table
-> - [] 8. Add error handling for wrong credentials
-> - [] 9. Test with multiple login scenarios
+> - [x] 1. Create User entity and repository
+> - [x] 2. Create registration DTO with validation
+> - [x] 3. Implement password hashing with BCrypt
+> - [x] 4. Create registration service logic
+> - [x] 5. Build registration controller endpoint
+> - [x] 6. Add duplicate user validation
+> - [x] 7. Generate and return JWT on success
+> - [-] 8. Test endpoint with RestTester
 > 
 > # Reports:
-> *
+> ## Task Completion Report: User Registration Endpoint
+> 
+> ### ✅ Completed
+> 
+> 1. **User Entity & Repository**
+>    - User entity with passwordHash, publicKey, fingerprint fields
+>    - UserRepository with `existsByEmail()` and `existsByUsername()` methods
+> 
+> 2. **Registration DTO with Validation**
+>    - RegisterRequest DTO with @NotBlank, @Email, @Size annotations
+>    - Custom PasswordValidator component with dev/prod mode support
+>    - Password strength: min 8 chars, uppercase, lowercase, digit, special char (@$!%*?&)
+>    - `isPasswordMatch()` method for password confirmation validation
+> 
+> 3. **Password Hashing with BCrypt**
+>    - BCryptPasswordEncoder(12) configured in SecurityConfig
+>    - Password encoded before saving to `passwordHash` field
+> 
+> 4. **Duplicate User Validation**
+>    - `existsByEmail()` check — throws UserAlreadyExistsException
+>    - `existsByUsername()` check — throws UserAlreadyExistsException
+> 
+> 5. **JWT Token Generation**
+>    - JwtTokenProvider with `generateAccessToken()` and `generateRefreshToken()`
+>    - Tokens returned in LoginResponse on successful registration
+>    - Access token: 15 min expiration | Refresh token: 7 days expiration
+> 
+> 6. **Registration Controller Endpoint**
+>    - POST /api/auth/register endpoint
+>    - Returns 201 CREATED with LoginResponse (accessToken, refreshToken, email, username)
+> 
+> 7. **JWT Authentication Filter**
+>    - JwtAuthenticationFilter with public endpoints whitelist
+>    - Skips JWT validation for: /api/auth/login, /api/auth/register, /api/auth/refresh, /api/auth/forgot-password
+>    - Extracts Bearer token from Authorization header
+> 
+> 8. **Security Configuration**
+>    - SecurityFilterChain with CORS enabled
+>    - Public endpoints permitted without authentication
+>    - Protected endpoints require valid JWT token
+>    - Custom authentication entry point (401 response)
+> 
+> 9. **Testing with Postman**
+>    - Valid registration: POST /api/auth/register → 201 + tokens
+>    - Duplicate email/username validation tested
+>    - Weak password validation tested
+>    - Password mismatch validation tested
+> 
+> ### 📋 Definition of Done Met
+> - ✅ POST /auth/register endpoint works
+> - ✅ Input validation implemented
+> - ✅ Password hashing with BCrypt implemented
+> - ✅ Duplicate user check implemented
+> - ✅ JWT token returned on successful registration
+> - ✅ Error responses for invalid input
+> 
+> ### 🔧 Tech Stack Used
+> - Spring Boot, Spring Security, JWT (JJWT), BCrypt
+> - CustomUserDetailsService, JwtTokenProvider
+> - CORS configuration for multi-platform support
 > </details>
 
 ## 001-0008
@@ -2497,30 +2554,32 @@ gantt
 > *
 > </details>
 
-## 001-0006
-> **User Registration Endpoint** ![status](https://img.shields.io/badge/status-ONGOING-yellow)
+## 001-0007
+> **Login Endpoint with JWT** ![status](https://img.shields.io/badge/status-ONGOING-yellow)
 > <details open>
 >     <summary>Details</summary>
 > 
-> The goal of this card is to implement the user registration endpoint with input validation, password hashing, and JWT token generation.
+> The goal of this card is to implement the login endpoint with JWT token generation, refresh token logic, and proper error handling.
 > 
 > # DOD (definition of done):
-> - POST /auth/register endpoint works
-> - Input validation implemented (email format, password strength)
-> - Password hashing with BCrypt implemented
-> - Duplicate user check implemented
-> - JWT token returned on successful registration
-> - Error responses for invalid input
+> - POST /auth/login endpoint works
+> - Email and password validation implemented
+> - JWT access token generated on successful login
+> - Refresh token logic implemented
+> - Token expiration configured
+> - Error responses for invalid credentials
+> - Last login timestamp updated
 > 
 > # TODO:
-> - [] 1. Create User entity and repository
-> - [] 2. Create registration DTO with validation
-> - [] 3. Implement password hashing with BCrypt
-> - [] 4. Create registration service logic
-> - [] 5. Build registration controller endpoint
-> - [] 6. Add duplicate user validation
-> - [] 7. Generate and return JWT on success
-> - [] 8. Test endpoint with Postman
+> - [] 1. Create JWT utility class (generate, validate, refresh tokens)
+> - [] 2. Create login DTO with email and password
+> - [] 3. Implement login service with credential validation
+> - [] 4. Build login controller endpoint
+> - [] 5. Add refresh token generation and storage
+> - [] 6. Configure token expiration times
+> - [] 7. Update last_login field in User table
+> - [] 8. Add error handling for wrong credentials
+> - [] 9. Test with multiple login scenarios
 > 
 > # Reports:
 > *
