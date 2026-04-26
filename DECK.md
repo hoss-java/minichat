@@ -1494,7 +1494,7 @@ gantt
 > </details>
 
 ## 001-0010
-> **Backend Integration Tests - Auth Endpoints** ![status](https://img.shields.io/badge/status-NOT--STARTED-lightgrey)
+> **Backend Integration Tests - Auth Endpoints** ![status](https://img.shields.io/badge/status-DONE-brightgreen)
 > <details >
 >     <summary>Details</summary>
 > 
@@ -1511,21 +1511,62 @@ gantt
 > - Code coverage above 80%
 > 
 > # TODO:
-> - [] 1. Setup test database configuration
-> - [] 2. Create test fixtures for users
-> - [] 3. Test successful registration
-> - [] 4. Test duplicate user registration
-> - [] 5. Test invalid registration input
-> - [] 6. Test successful login
-> - [] 7. Test login with wrong credentials
-> - [] 8. Test JWT validation
-> - [] 9. Test token expiration
-> - [] 10. Test refresh token functionality
-> - [] 11. Test profile endpoints
-> - [] 12. Run code coverage analysis
+> - [x] 1. Setup test database configuration
+> - [x] 2. Create test fixtures for users
+> - [x] 3. Test successful registration
+> - [x] 4. Test duplicate user registration
+> - [x] 5. Test invalid registration input
+> - [x] 6. Test successful login
+> - [x] 7. Test login with wrong credentials
+> - [x] 8. Test JWT validation
+> - [x] 9. Test token expiration
+> - [x] 10. Test refresh token functionality
+> - [x] 11. Test profile endpoints
+> - [x] 12. Run code coverage analysis
 > 
 > # Reports:
-> *
+> 
+> ## Unit Tests
+> 
+> - AuthServiceUnitTest.java ✅
+> - CustomUserDetailsServiceUnitTest.java ✅
+> - JwtTokenProviderUnitTest.java ✅ 
+> - PasswordEncoderUnitTest.java ✅ 
+> - PasswordValidatorUnitTest.java ✅ 
+> - JwtAuthenticationFilterUnitTest.java ✅
+> - UserUnitTest.java ✅
+> - SessionUnitTest.java ✅
+> - RoleUnitTest.java ✅
+> 
+> ## Integration Tests
+> 
+> - AuthControllerIntegrationTest.java ✅
+> - CustomUserDetailsServiceIntegrationTest.java (not not should be done later)
+> 
+> ## Backend tests files map
+> ```
+> └── java
+>     └── com
+>         └── minichat
+>             ├── controller
+>             │ └── AuthControllerIntegrationTest.java
+>             ├── dto
+>             ├── entity
+>             │ ├── RoleUnitTest.java
+>             │ ├── SessionUnitTest.java
+>             │ └── UserUnitTest.java
+>             ├── MiniChatAppTest.java
+>             ├── security
+>             │ ├── JwtAuthenticationFilterUnitTest.java
+>             │ └── JwtTokenProviderUnitTest.java
+>             ├── service
+>             │ ├── AuthServiceIntegrationTest.java
+>             │ ├── AuthServiceUnitTest.java
+>             │ └── CustomUserDetailsServiceUnitTest.java
+>             └── util
+>                 ├── PasswordEncoderUnitTest.java
+>                 └── PasswordValidatorUnitTest.java
+> ```
 > </details>
 
 ## 001-0011
