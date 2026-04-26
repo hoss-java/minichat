@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="theme-toggle-container">
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle between light and dark theme">
+            <span class="toggle-icon">🌙</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <h1>API Testing Tool</h1>
+        
+        <!-- Token Management Section -->
+        <div class="token-section">
+            <div class="form-group">
+                <label for="token">Authorization Token:</label>
+                <div class="token-info">
+                    <small style="color: var(--text-secondary);">Access Token (auto-updated after login)</small>
+                </div>
+                <div class="token-input-group">
+                    <textarea id="token" placeholder="Paste your JWT token here" class="token-input" rows="3"></textarea>
+                    <button id="save-token" class="icon-btn" aria-label="Save token" title="Save token to storage">💾</button>
+                    <button id="clear-token" class="icon-btn" aria-label="Clear token" title="Clear token">✕</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="refresh-token">Refresh Token:</label>
+                <div class="token-info">
+                    <small style="color: var(--text-secondary);">Used to get new access tokens</small>
+                </div>
+                <div class="token-input-group">
+                    <textarea id="refresh-token" placeholder="Refresh token (auto-populated after login)" class="token-input" rows="3" readonly></textarea>
+                    <button id="clear-refresh-token" class="icon-btn" aria-label="Clear refresh token" title="Clear refresh token">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Configuration Section -->
+        <div class="request-section">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="method">HTTP Method:</label>
+                    <select id="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="endpoint">Endpoint:</label>
+                    <input type="text" id="endpoint" placeholder="e.g., /auth/me, /auth/login" value="">
+                </div>
+
+                <button id="send-btn" class="send-button">Send Request</button>
+            </div>
+
+            <!-- Endpoint Presets -->
+            <div class="presets-group">
+                <label>Quick Presets:</label>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-endpoint="/auth/login" data-method="POST">Login</button>
+                    <button class="preset-btn" data-endpoint="/auth/register" data-method="POST">Register</button>
+                    <button class="preset-btn" data-endpoint="/auth/me" data-method="GET">Get Profile</button>
+                    <button class="preset-btn" data-endpoint="/auth/refresh" data-method="POST">Refresh Token</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Headers Section -->
+        <div class="headers-section">
+            <div class="section-header">
+                <h3>Custom Headers</h3>
+                <button id="add-header-btn" class="icon-btn">+</button>
+            </div>
+            <div id="headers-list" class="headers-list">
+                <div class="empty-message">No custom headers added</div>
+            </div>
+        </div>
+
+        <!-- Request/Response Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="request-tab">Request</button>
+            <button class="tab-btn" data-tab="response-tab">Response</button>
+            <button class="tab-btn" data-tab="history-tab">History</button>
+        </div>
+
+        <!-- Request Tab -->
+        <div id="request-tab" class="tab-content active">
+            <div class="request-details">
+                <div class="detail-section">
+                    <h4>Request Info</h4>
+                    <div class="info-box">
+                        <div class="info-item">
+                            <span class="label">Timestamp:</span>
+                            <span id="request-timestamp" class="value">—</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Full URL:</span>
+                            <span id="request-url" class="value">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Headers</h4>
+                    <pre id="request-headers" class="code-block">No headers sent yet</pre>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Body</h4>
+                    <div class="form-group">
+                        <textarea id="body" placeholder='{"username": "testuser1", "password": "TestUser123!"}'></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Tab -->
+        <div id="response-tab" class="tab-content">
+            <div class="response-info">
+                <span id="response-status" class="status-badge">—</span>
+                <span id="response-time" class="response-time">—</span>
+                <button id="copy-response" class="icon-btn" aria-label="Copy response">📋</button>
+            </div>
+
+            <div class="detail-section">
+                <h4>Response Headers</h4>
+                <pre id="response-headers" class="code-block">No response yet</pre>
+            </div>
+
+            <div id="response" class="response">
+                <h4>Response Body</h4>
+                <pre id="responseBody"></pre>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history-tab" class="tab-content">
+            <div class="history-controls">
+                <button id="clear-history" class="icon-btn">Clear History</button>
+            </div>
+            <ul id="history-list" class="history-list"></ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
