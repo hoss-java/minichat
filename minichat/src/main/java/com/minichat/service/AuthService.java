@@ -5,6 +5,7 @@ import com.minichat.dto.RegisterResponse;
 import com.minichat.dto.LoginRequest;
 import com.minichat.dto.LoginResponse;
 import com.minichat.dto.UserProfileDto;
+import com.minichat.dto.UpdateProfileRequest;
 import com.minichat.entity.User;
 import com.minichat.entity.RoleType;
 import com.minichat.entity.Role;
@@ -179,37 +180,52 @@ public class AuthService {
                 .build();
     }
 
-    public UserProfileDto getCurrentUserProfile(String email) {
-        User user = userRepository.findByEmail(email)
+    public UserProfileDto getCurrentUserProfile(String username) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
 
         return UserProfileDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .username(user.getUsername())
+                .publicKey(user.getPublicKey())
                 .fingerprint(user.getFingerprint())
                 .createdAt(user.getCreatedAt())
                 .lastLogin(user.getLastLogin())
+                .isActive(user.getIsActive())
                 .build();
     }
 
-    public UserProfileDto updateUserProfile(String email, UserProfileDto profileDto) {
-        User user = userRepository.findByEmail(email)
+    public UserProfileDto updateUserProfile(String username, UpdateProfileRequest updateRequest) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
 
-        if (profileDto.getUsername() != null) {
-            user.setUsername(profileDto.getUsername());
+        // Check if new email already exists (and it's not the same user)
+        if (!user.getEmail().equals(updateRequest.getEmail())) {
+            userRepository.findByEmail(updateRequest.getEmail())
+                    .ifPresent(u -> {
+                        throw new UserAlreadyExistsException("Email already in use");
+                    });
         }
+
+        user.setUsername(updateRequest.getUsername());
+        user.setEmail(updateRequest.getEmail());
 
         User updatedUser = userRepository.save(user);
 
+        return mapToUserProfileDto(updatedUser);
+    }
+
+    private UserProfileDto mapToUserProfileDto(User user) {
         return UserProfileDto.builder()
-                .id(updatedUser.getId())
-                .email(updatedUser.getEmail())
-                .username(updatedUser.getUsername())
-                .fingerprint(updatedUser.getFingerprint())
-                .createdAt(updatedUser.getCreatedAt())
-                .lastLogin(updatedUser.getLastLogin())
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .publicKey(user.getPublicKey())
+                .fingerprint(user.getFingerprint())
+                .createdAt(user.getCreatedAt())
+                .lastLogin(user.getLastLogin())
+                .isActive(user.getIsActive())
                 .build();
     }
 

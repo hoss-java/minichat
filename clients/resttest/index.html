@@ -20,11 +20,24 @@
         <div class="token-section">
             <div class="form-group">
                 <label for="token">Authorization Token:</label>
+                <div class="token-info">
+                    <small style="color: var(--text-secondary);">Access Token (auto-updated after login)</small>
+                </div>
                 <div class="token-input-group">
-                    <input type="password" id="token" placeholder="Paste your JWT token here" class="token-input">
-                    <button id="toggle-token-visibility" class="icon-btn" aria-label="Toggle token visibility">👁️</button>
-                    <button id="save-token" class="icon-btn" aria-label="Save token">💾</button>
-                    <button id="clear-token" class="icon-btn" aria-label="Clear token">✕</button>
+                    <textarea id="token" placeholder="Paste your JWT token here" class="token-input" rows="3"></textarea>
+                    <button id="save-token" class="icon-btn" aria-label="Save token" title="Save token to storage">💾</button>
+                    <button id="clear-token" class="icon-btn" aria-label="Clear token" title="Clear token">✕</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="refresh-token">Refresh Token:</label>
+                <div class="token-info">
+                    <small style="color: var(--text-secondary);">Used to get new access tokens</small>
+                </div>
+                <div class="token-input-group">
+                    <textarea id="refresh-token" placeholder="Refresh token (auto-populated after login)" class="token-input" rows="3" readonly></textarea>
+                    <button id="clear-refresh-token" class="icon-btn" aria-label="Clear refresh token" title="Clear refresh token">✕</button>
                 </div>
             </div>
         </div>
@@ -45,7 +58,7 @@
 
                 <div class="form-group">
                     <label for="endpoint">Endpoint:</label>
-                    <input type="text" id="endpoint" placeholder="e.g., /users/me, /auth/login" value="">
+                    <input type="text" id="endpoint" placeholder="e.g., /auth/me, /auth/login" value="">
                 </div>
 
                 <button id="send-btn" class="send-button">Send Request</button>
@@ -57,7 +70,7 @@
                 <div class="preset-buttons">
                     <button class="preset-btn" data-endpoint="/auth/login" data-method="POST">Login</button>
                     <button class="preset-btn" data-endpoint="/auth/register" data-method="POST">Register</button>
-                    <button class="preset-btn" data-endpoint="/users/me" data-method="GET">Get Profile</button>
+                    <button class="preset-btn" data-endpoint="/auth/me" data-method="GET">Get Profile</button>
                     <button class="preset-btn" data-endpoint="/auth/refresh" data-method="POST">Refresh Token</button>
                 </div>
             </div>
@@ -106,7 +119,7 @@
                 <div class="detail-section">
                     <h4>Body</h4>
                     <div class="form-group">
-                        <textarea id="body" placeholder='{"email": "user@example.com", "password": "password123"}'></textarea>
+                        <textarea id="body" placeholder='{"username": "testuser1", "password": "TestUser123!"}'></textarea>
                     </div>
                 </div>
             </div>

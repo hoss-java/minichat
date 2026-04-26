@@ -39,37 +39,71 @@ function toggleTheme() {
   setTheme(newTheme);
 }
 
-// Token Management
+// ==================== TOKEN MANAGEMENT ====================
+
 function loadTokenFromStorage() {
-  const token = localStorage.getItem('apiToken');
-  if (token) {
-    document.getElementById('token').value = token;
+  const accessToken = localStorage.getItem('apiAccessToken');
+  const refreshToken = localStorage.getItem('apiRefreshToken');
+  
+  if (accessToken) {
+    document.getElementById('token').value = accessToken;
+  }
+  if (refreshToken) {
+    document.getElementById('refresh-token').value = refreshToken;
   }
 }
 
 function saveToken() {
-  const token = document.getElementById('token').value.trim();
-  if (token) {
-    localStorage.setItem('apiToken', token);
-    showNotification('Token saved', 'success');
-  } else {
-    showNotification('Token is empty', 'error');
+  const accessToken = document.getElementById('token').value.trim();
+  const refreshToken = document.getElementById('refresh-token').value.trim();
+  
+  if (accessToken) {
+    localStorage.setItem('apiAccessToken', accessToken);
   }
+  if (refreshToken) {
+    localStorage.setItem('apiRefreshToken', refreshToken);
+  }
+  
+  showNotification('Tokens saved', 'success');
 }
 
 function clearToken() {
   document.getElementById('token').value = '';
-  localStorage.removeItem('apiToken');
-  showNotification('Token cleared', 'success');
+  document.getElementById('refresh-token').value = '';
+  localStorage.removeItem('apiAccessToken');
+  localStorage.removeItem('apiRefreshToken');
+  showNotification('Tokens cleared', 'success');
 }
 
-function toggleTokenVisibility() {
-  const tokenInput = document.getElementById('token');
-  const isPassword = tokenInput.type === 'password';
-  tokenInput.type = isPassword ? 'text' : 'password';
-  
-  const btn = document.getElementById('toggle-token-visibility');
-  btn.textContent = isPassword ? '🙈' : '👁️';
+function clearRefreshToken() {
+  document.getElementById('refresh-token').value = '';
+  localStorage.removeItem('apiRefreshToken');
+  showNotification('Refresh token cleared', 'success');
+}
+
+/**
+ * Extract tokens from login/auth response and auto-save them
+ */
+function handleAuthResponse(responseData) {
+  try {
+    // Check if response contains access token
+    if (responseData.accessToken) {
+      const accessToken = responseData.accessToken;
+      document.getElementById('token').value = accessToken;
+      localStorage.setItem('apiAccessToken', accessToken);
+      showNotification('Access token updated', 'success');
+    }
+    
+    // Check if response contains refresh token
+    if (responseData.refreshToken) {
+      const refreshToken = responseData.refreshToken;
+      document.getElementById('refresh-token').value = refreshToken;
+      localStorage.setItem('apiRefreshToken', refreshToken);
+      showNotification('Refresh token saved', 'success');
+    }
+  } catch (error) {
+    console.error('Error handling auth response:', error);
+  }
 }
 
 // Custom Headers Management
@@ -171,7 +205,7 @@ async function makeRequest() {
   const method = document.getElementById('method').value;
   const endpoint = document.getElementById('endpoint').value;
   const body = document.getElementById('body').value;
-  const token = document.getElementById('token').value;
+  const accessToken = document.getElementById('token').value;
   const responseDiv = document.getElementById('response');
   const responseBody = document.getElementById('responseBody');
 
@@ -196,9 +230,9 @@ async function makeRequest() {
       },
     };
 
-    // Add Authorization header if token exists
-    if (token.trim()) {
-      options.headers['Authorization'] = `Bearer ${token.trim()}`;
+    // Add Authorization header if access token exists
+    if (accessToken.trim()) {
+      options.headers['Authorization'] = `Bearer ${accessToken.trim()}`;
     }
 
     // Add custom headers
@@ -227,8 +261,10 @@ async function makeRequest() {
 
     // Try to pretty-print JSON
     let displayData = data;
+    let parsedData = null;
     try {
-      displayData = JSON.stringify(JSON.parse(data), null, 2);
+      parsedData = JSON.parse(data);
+      displayData = JSON.stringify(parsedData, null, 2);
     } catch (e) {
       // Not JSON, display as is
     }
@@ -241,6 +277,11 @@ async function makeRequest() {
 
     // Update status badge
     updateResponseStatus(response.status, responseTime);
+
+    // Check if this is an auth response (contains access token)
+    if (parsedData && (parsedData.accessToken || parsedData.refreshToken)) {
+      handleAuthResponse(parsedData);
+    }
 
     // Add to history
     addToHistory(method, endpoint, response.status);
@@ -379,9 +420,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Token management
   loadTokenFromStorage();
-  document.getElementById('toggle-token-visibility').addEventListener('click', toggleTokenVisibility);
   document.getElementById('save-token').addEventListener('click', saveToken);
   document.getElementById('clear-token').addEventListener('click', clearToken);
+  document.getElementById('clear-refresh-token').addEventListener('click', clearRefreshToken);
 
   // Custom headers
   document.getElementById('add-header-btn').addEventListener('click', addHeader);
