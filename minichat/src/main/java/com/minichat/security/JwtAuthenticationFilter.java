@@ -56,24 +56,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = extractTokenFromRequest(request);
 
-            if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
-                String username = jwtTokenProvider.extractUsername(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (StringUtils.hasText(token)) {
+                if (jwtTokenProvider.validateToken(token)) {
+                    String username = jwtTokenProvider.extractUsername(token);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities());
 
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.debug("User authenticated: {}", username);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.debug("User authenticated: {}", username);
+                } else {
+                    // Token invalid or expired
+                    sendUnauthorizedError(response, "Invalid or expired token");
+                    return;
+                }
             } else {
-                log.warn("Invalid or missing JWT token for protected endpoint: {}", requestPath);
+                // No token provided
+                sendUnauthorizedError(response, "Missing authorization token");
+                return;
             }
         } catch (Exception ex) {
-            log.error("Could not set user authentication in security context", ex);
+            log.error("Authentication error", ex);
+            sendUnauthorizedError(response, "Authentication failed: " + ex.getMessage());
+            return;
         }
 
         filterChain.doFilter(request, response);
@@ -89,5 +99,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(BEARER_PREFIX.length()).trim();
         }
         return null;
+    }
+
+    private void sendUnauthorizedError(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        
+        String errorResponse = String.format(
+            "{\"error\": \"Unauthorized\", \"message\": \"%s\"}", 
+            message
+        );
+        response.getWriter().write(errorResponse);
+        log.warn("Unauthorized request: {}", message);
     }
 }

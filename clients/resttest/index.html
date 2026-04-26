@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiniChat</title>
+    <title>API Testing Tool</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,33 +14,129 @@
     </div>
 
     <div class="container">
-        <h1>MiniChat API Proxy</h1>
+        <h1>API Testing Tool</h1>
         
-        <div class="form-group">
-            <label for="method">HTTP Method:</label>
-            <select id="method">
-                <option value="GET">GET</option>
-                <option value="POST">POST</option>
-                <option value="PUT">PUT</option>
-                <option value="DELETE">DELETE</option>
-            </select>
+        <!-- Token Management Section -->
+        <div class="token-section">
+            <div class="form-group">
+                <label for="token">Authorization Token:</label>
+                <div class="token-input-group">
+                    <input type="password" id="token" placeholder="Paste your JWT token here" class="token-input">
+                    <button id="toggle-token-visibility" class="icon-btn" aria-label="Toggle token visibility">👁️</button>
+                    <button id="save-token" class="icon-btn" aria-label="Save token">💾</button>
+                    <button id="clear-token" class="icon-btn" aria-label="Clear token">✕</button>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="endpoint">Endpoint:</label>
-            <input type="text" id="endpoint" placeholder="e.g., register, users, orders" value="products">
+        <!-- Request Configuration Section -->
+        <div class="request-section">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="method">HTTP Method:</label>
+                    <select id="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="endpoint">Endpoint:</label>
+                    <input type="text" id="endpoint" placeholder="e.g., /users/me, /auth/login" value="">
+                </div>
+
+                <button id="send-btn" class="send-button">Send Request</button>
+            </div>
+
+            <!-- Endpoint Presets -->
+            <div class="presets-group">
+                <label>Quick Presets:</label>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-endpoint="/auth/login" data-method="POST">Login</button>
+                    <button class="preset-btn" data-endpoint="/auth/register" data-method="POST">Register</button>
+                    <button class="preset-btn" data-endpoint="/users/me" data-method="GET">Get Profile</button>
+                    <button class="preset-btn" data-endpoint="/auth/refresh" data-method="POST">Refresh Token</button>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="body">Request Body (JSON):</label>
-            <textarea id="body" placeholder='{"name": "Product", "price": 100}'></textarea>
+        <!-- Custom Headers Section -->
+        <div class="headers-section">
+            <div class="section-header">
+                <h3>Custom Headers</h3>
+                <button id="add-header-btn" class="icon-btn">+</button>
+            </div>
+            <div id="headers-list" class="headers-list">
+                <div class="empty-message">No custom headers added</div>
+            </div>
         </div>
 
-        <button id="send-btn" class="send-button">Send Request</button>
+        <!-- Request/Response Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="request-tab">Request</button>
+            <button class="tab-btn" data-tab="response-tab">Response</button>
+            <button class="tab-btn" data-tab="history-tab">History</button>
+        </div>
 
-        <div id="response" class="response">
-            <h3>Response:</h3>
-            <pre id="responseBody"></pre>
+        <!-- Request Tab -->
+        <div id="request-tab" class="tab-content active">
+            <div class="request-details">
+                <div class="detail-section">
+                    <h4>Request Info</h4>
+                    <div class="info-box">
+                        <div class="info-item">
+                            <span class="label">Timestamp:</span>
+                            <span id="request-timestamp" class="value">—</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Full URL:</span>
+                            <span id="request-url" class="value">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Headers</h4>
+                    <pre id="request-headers" class="code-block">No headers sent yet</pre>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Body</h4>
+                    <div class="form-group">
+                        <textarea id="body" placeholder='{"email": "user@example.com", "password": "password123"}'></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Tab -->
+        <div id="response-tab" class="tab-content">
+            <div class="response-info">
+                <span id="response-status" class="status-badge">—</span>
+                <span id="response-time" class="response-time">—</span>
+                <button id="copy-response" class="icon-btn" aria-label="Copy response">📋</button>
+            </div>
+
+            <div class="detail-section">
+                <h4>Response Headers</h4>
+                <pre id="response-headers" class="code-block">No response yet</pre>
+            </div>
+
+            <div id="response" class="response">
+                <h4>Response Body</h4>
+                <pre id="responseBody"></pre>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history-tab" class="tab-content">
+            <div class="history-controls">
+                <button id="clear-history" class="icon-btn">Clear History</button>
+            </div>
+            <ul id="history-list" class="history-list"></ul>
         </div>
     </div>
 
